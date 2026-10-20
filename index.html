@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e8efea">
+  <meta name="description" content="Составьте маршрут с учётом ступеней, уклона, покрытия и переходов. Отмечайте препятствия на карте и выгружайте отчёт для проверки доступности улиц в Уфе.">
+  <meta name="geo.region" content="RU-BA">
+  <meta name="geo.placename" content="Уфа, Республика Башкортостан">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Waymark — маршрут, который можно пройти">
+  <meta property="og:description" content="Сравните варианты маршрута для разных способов передвижения и соберите список мест, которые требуют проверки.">
+  <meta property="og:image" content="https://thelastie.github.io/waymark/preview.png">
+  <meta property="og:locale" content="ru_RU">
+  <link rel="canonical" href="https://thelastie.github.io/waymark/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Waymark","applicationCategory":"TravelApplication","operatingSystem":"Any","inLanguage":"ru","description":"Локальный инструмент для сравнения городских маршрутов с учётом ступеней, уклона, покрытия, переходов и подтверждённых полевых заметок."}</script>
+  <title>Waymark — карта маршрута и уличных препятствий</title>
+  <link rel="stylesheet" href="styles.css?v=1">
+  <link rel="stylesheet" href="map-fix.css?v=1">
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Waymark — к началу">
+      <svg viewBox="0 0 38 38" aria-hidden="true"><path d="M8 28 16 9l5 12 4-9 5 16"/><circle cx="16" cy="9" r="2.2"/><circle cx="30" cy="28" r="2.2"/></svg>
+      <span>waymark</span>
+    </a>
+    <div class="privacy-note"><span class="privacy-dot"></span>Данные остаются в этом браузере</div>
+    <div class="top-actions">
+      <label class="import-button" for="networkFile">Открыть карту <span>＋</span></label>
+      <input id="networkFile" type="file" accept=".json,application/json" hidden>
+      <button class="export-button" id="exportReport" type="button">Скачать отчёт <span>↓</span></button>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="pageTitle">
+      <div class="intro-copy">
+        <p class="location-line"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 6.7c0 3.4-5 7.7-5 7.7S3 10.1 3 6.7a5 5 0 1 1 10 0Z"/><circle cx="8" cy="6.5" r="1.7"/></svg>Полевой атлас · Уфа</p>
+        <h1 id="pageTitle">Маршрут, который<br>можно пройти.</h1>
+        <p class="intro-note">Сравните путь по уклонам, ступеням и переходам. Отметьте, что проверено на месте, а что пока остаётся вопросом.</p>
+      </div>
+      <div class="route-stamp" aria-label="Пример маршрута от дома до поликлиники">
+        <span>СЕГОДНЯШНИЙ МАРШРУТ</span>
+        <div class="stamp-route"><i></i><b></b><i></i></div>
+        <strong>Дом <span>—</span> поликлиника</strong>
+      </div>
+    </section>
+
+    <section class="journey-bar" aria-label="Параметры маршрута">
+      <div class="journey-point">
+        <label for="startSelect">Откуда</label>
+        <select id="startSelect"></select>
+      </div>
+      <button class="swap-button" id="swapPoints" type="button" aria-label="Поменять точки местами" title="Поменять точки местами">↕</button>
+      <div class="journey-point">
+        <label for="endSelect">Куда</label>
+        <select id="endSelect"></select>
+      </div>
+      <div class="journey-divider"></div>
+      <fieldset class="profile-select">
+        <legend>Как вы передвигаетесь?</legend>
+        <label><input type="radio" name="profile" value="wheelchair" checked><span>Кресло</span></label>
+        <label><input type="radio" name="profile" value="walker"><span>Ходунки</span></label>
+        <label><input type="radio" name="profile" value="stroller"><span>Коляска</span></label>
+        <label><input type="radio" name="profile" value="walking"><span>Пешком</span></label>
+      </fieldset>
+    </section>
+
+    <section class="workspace" aria-label="Карта маршрута и проверка улиц">
+      <div class="map-panel">
+        <div class="map-heading">
+          <div>
+            <p class="section-label">РАЙОННЫЙ МАРШРУТ</p>
+            <h2>Дом — поликлиника</h2>
+          </div>
+          <button class="map-locate" id="resetMap" type="button" aria-label="Сбросить карту и образец">Сбросить образец ↺</button>
+        </div>
+        <div class="map-wrap">
+      <svg id="routeMap" class="route-map" viewBox="0 0 1000 620" role="group" aria-labelledby="mapTitle mapDescription">
+            <title id="mapTitle">Карта улиц и выбранного маршрута</title>
+            <desc id="mapDescription">Линиями показаны участки улиц. Сплошные отмечены как проверенные, пунктирные требуют проверки. Нажмите на участок, чтобы изменить его сведения.</desc>
+            <defs>
+              <pattern id="blockGrid" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#becbc5" opacity=".42"/></pattern>
+              <filter id="routeGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>
+            </defs>
+            <rect width="1000" height="620" fill="#e8efea"/>
+            <path class="park-shape" d="M760 68h190v168H760zM54 418h190v150H54z"/>
+            <path class="water-shape" d="M0 360C172 330 208 388 330 364s206-45 334-8 218 51 336 3v43c-132 45-226 15-352-17s-211 2-326 26S152 382 0 405Z"/>
+            <g class="block-lines" aria-hidden="true">
+              <path d="M45 78h231v93H45zM292 70h172v116H292zM490 88h220v105H490zM60 205h186v125H60zM292 222h160v119H292zM502 221h188v101H502zM738 276h200v111H738zM278 418h204v146H278zM513 430h190v132H513z"/>
+              <path d="M45 78h231v93H45zM292 70h172v116H292zM490 88h220v105H490zM60 205h186v125H60zM292 222h160v119H292zM502 221h188v101H502zM738 276h200v111H738zM278 418h204v146H278zM513 430h190v132H513z" fill="url(#blockGrid)"/>
+            </g>
+            <g id="streetLayer" aria-label="Участки улиц"></g>
+            <g id="routeGlowLayer" aria-hidden="true"></g>
+            <g id="routeLayer" aria-label="Выбранный маршрут"></g>
+            <g id="nodeLayer" aria-label="Места на карте"></g>
+            <g class="north-mark" aria-hidden="true"><path d="M38 76V38m0 0-6 9m6-9 6 9"/><text x="38" y="28" text-anchor="middle">N</text></g>
+            <text class="map-label" x="114" y="398">УЛИЦА СОВЕТСКАЯ</text>
+            <text class="map-label" x="594" y="348">ТИХАЯ НАБЕРЕЖНАЯ</text>
+            <text class="map-label" x="800" y="92">СКВЕР</text>
+          </svg>
+          <div class="map-compass" aria-hidden="true"><span>N</span><i>↑</i></div>
+          <div class="map-scale" aria-hidden="true"><i></i><span>СХЕМА · НЕ В МАСШТАБЕ</span></div>
+        </div>
+        <div class="map-legend" aria-label="Обозначения карты">
+          <span><i class="legend-route"></i>Ваш маршрут</span>
+          <span><i class="legend-checked"></i>Проверено</span>
+          <span><i class="legend-unknown"></i>Нужно уточнить</span>
+          <span><i class="legend-barrier"></i>Препятствие</span>
+        </div>
+      </div>
+
+      <aside class="route-panel" aria-label="Сводка и подробности маршрута">
+        <div class="route-options">
+          <div class="panel-title-line"><h2>Вариант пути</h2><span id="routeCount" class="route-count">3 варианта</span></div>
+          <div class="route-tabs" role="tablist" aria-label="Способ выбора маршрута">
+            <button type="button" class="route-tab is-active" id="modeBalanced" role="tab" aria-selected="true" data-mode="balanced"><span>Бережный</span><small>меньше сложных мест</small></button>
+            <button type="button" class="route-tab" id="modeShort" role="tab" aria-selected="false" data-mode="short"><span>Короткий</span><small>минимум расстояния</small></button>
+            <button type="button" class="route-tab" id="modeVerified" role="tab" aria-selected="false" data-mode="verified"><span>Проверенный</span><small>больше данных с места</small></button>
+          </div>
+        </div>
+
+        <div class="route-summary" id="routeSummary" aria-live="polite">
+          <div class="summary-top"><span class="status-mark" id="routeStatusMark"></span><span id="routeStatus">Маршрут можно проверить</span></div>
+          <div class="distance-line"><strong id="routeDistance">—</strong><span>км</span><span class="summary-separator">·</span><span id="routeMinutes">— минут</span></div>
+          <p class="summary-copy" id="routeExplanation"></p>
+          <div class="summary-counts"><span><b id="barrierCount">0</b> сложных участков</span><span><b id="unknownCount">0</b> требуют проверки</span></div>
+        </div>
+
+        <section class="segment-inspector" aria-labelledby="inspectorTitle">
+          <div class="inspector-heading">
+            <div><p class="section-label">ВЫБРАННЫЙ УЧАСТОК</p><h3 id="inspectorTitle">Нажмите линию на карте</h3></div>
+            <span class="segment-state" id="segmentState">—</span>
+          </div>
+          <p class="inspector-intro" id="inspectorIntro">Сведения об отрезке помогают понять, можно ли пройти его в выбранном профиле.</p>
+          <div class="inspector-form" id="inspectorForm" hidden>
+            <label>Покрытие<select id="surfaceInput"><option value="smooth">Ровное покрытие</option><option value="pavers">Плитка</option><option value="rough">Неровное</option><option value="gravel">Гравий</option></select></label>
+            <div class="form-row"><label>Уклон, °<input id="slopeInput" type="number" min="0" max="35" step="1"></label><label>Бордюр, см<input id="curbInput" type="number" min="0" max="50" step="1"></label></div>
+            <label class="check-row"><input id="stepsInput" type="checkbox"><span>На пути есть ступени</span></label>
+            <label>Переход<select id="crossingInput"><option value="none">Нет перехода</option><option value="marked">Размеченный</option><option value="signal">Со светофором</option><option value="uncontrolled">Без регулирования</option></select></label>
+            <div class="form-row"><label class="check-row"><input id="litInput" type="checkbox"><span>Освещён вечером</span></label><label class="check-row"><input id="verifiedInput" type="checkbox"><span>Проверено на месте</span></label></div>
+            <label>Заметка<textarea id="noteInput" rows="2" maxlength="180" placeholder="Что стоит учесть человеку на этом участке?"></textarea></label>
+          </div>
+          <p class="form-feedback" id="formFeedback" aria-live="polite"></p>
+        </section>
+
+        <section class="route-notes" aria-labelledby="notesTitle">
+          <div class="notes-heading"><h3 id="notesTitle">Что нужно учесть</h3><span id="noteTotal">0</span></div>
+          <ul id="issueList" class="issue-list"></ul>
+          <p id="emptyIssues" class="empty-issues">Для этого варианта пока нет отмеченных препятствий.</p>
+        </section>
+        <footer class="panel-foot"><span>Схема для примера. Это не официальная карта; проверьте условия на месте.</span><span>Все правки локальны</span></footer>
+      </aside>
+    </section>
+
+    <section class="data-strip" aria-label="Данные карты">
+      <div><span class="strip-symbol">⌁</span><p><strong>Не обещаем доступность на глаз.</strong> Непроверенный бордюр останется вопросом, пока его не отметит человек на месте.</p></div>
+      <div class="data-actions"><button id="exportNetwork" type="button">Скачать карту JSON</button><button id="exportCsv" type="button">Список участков CSV</button></div>
+    </section>
+    <p id="appStatus" class="sr-only" role="status" aria-live="polite"></p>
+  </main>
+</body>
+</html>
