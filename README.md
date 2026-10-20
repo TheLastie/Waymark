@@ -19,6 +19,28 @@ Open `index.html` in a recent browser. No build step, account, server or network
 3. Select a street segment on the map to record its surface, slope, curb, crossing, lighting, verification and a note.
 4. Download a route report (JSON), segment register (CSV), or a local map you can reopen later.
 
+### Bring your own survey network
+
+Waymark can open a small JSON network prepared from a local accessibility survey. Coordinates use the map's schematic view box (`x`: 20–980, `y`: 20–600); they position places for the diagram and do not imply geographic accuracy. Keep identifiers unique and use one record per walkable segment.
+
+```json
+{
+  "places": [
+    { "id": "stop-a", "name": "Bus stop", "x": 120, "y": 420 },
+    { "id": "clinic", "name": "Clinic entrance", "x": 850, "y": 160 }
+  ],
+  "edges": [
+    {
+      "id": "sidewalk-01", "a": "stop-a", "b": "clinic", "km": 0.64,
+      "surface": "smooth", "slope": 3, "curb": 0, "steps": false,
+      "crossing": "signal", "lit": true, "verified": false, "note": ""
+    }
+  ]
+}
+```
+
+`surface` accepts `unknown`, `smooth`, `pavers`, `rough`, or `gravel`; `crossing` accepts `unknown`, `none`, `marked`, `signal`, or `uncontrolled`. A network can contain 2–100 places and 1–500 segments. Missing measurements stay unknown, increase the route's uncertainty and remain visible in the report. The app validates imported data, keeps it in this browser, and flags user-provided information as unverified until someone records a field check.
+
 ## Why this project exists
 
 City accessibility data is often incomplete or outdated. Waymark makes uncertainty visible instead of silently treating an unverified sidewalk as safe. Its useful output is a shareable list of exact segments to check, with enough context for a resident, community group or city team to discuss what needs fixing.
@@ -39,6 +61,8 @@ The visual idea is a **field atlas**: a quiet street-map palette with a distinct
 2. Сравните сбалансированный, кратчайший и более тщательно проверенный маршруты.
 3. Выберите отрезок улицы на карте и укажите покрытие, уклон, бордюр, переход, освещение, проверку и заметку.
 4. Скачайте отчёт по маршруту (JSON), таблицу отрезков (CSV) или локальную карту для последующего открытия.
+
+Waymark принимает собственные JSON-схемы районной сети: места с `id`, `name`, координатами схемы `x` и `y`, а также отрезки между ними с длиной и условиями прохода. Если измерений нет, они остаются неизвестными, влияют на сравнение маршрутов и видны в отчёте. Импортированные схемы можно редактировать, сохранить в браузере и выгрузить вместе с пометками. Пример и допустимые поля находятся выше.
 
 ### GEO и SEO
 
