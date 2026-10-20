@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://thelastie.github.io/waymark/sitemap.xml
+Sitemap: https://thelastie.github.io/Waymark/sitemap.xml
