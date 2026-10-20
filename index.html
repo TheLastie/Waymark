@@ -21,7 +21,7 @@
   <title>Waymark — карта маршрута и уличных препятствий</title>
   <link rel="stylesheet" href="styles.css?v=1">
   <link rel="stylesheet" href="map-fix.css?v=1">
-  <script src="app.js?v=1" defer></script>
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -140,7 +140,7 @@
           <p class="inspector-intro" id="inspectorIntro">Сведения об отрезке помогают понять, можно ли пройти его в выбранном профиле.</p>
           <div class="inspector-form" id="inspectorForm" hidden>
             <label>Покрытие<select id="surfaceInput"><option value="unknown">Не указано</option><option value="smooth">Ровное покрытие</option><option value="pavers">Плитка</option><option value="rough">Неровное</option><option value="gravel">Гравий</option></select></label>
-            <div class="form-row"><label>Уклон, °<input id="slopeInput" type="number" min="0" max="35" step="1"></label><label>Бордюр, см<input id="curbInput" type="number" min="0" max="50" step="1"></label></div>
+            <div class="form-row"><label>Уклон, %<input id="slopeInput" type="number" min="0" max="35" step="1" title="Продольный уклон в процентах"></label><label>Бордюр, см<input id="curbInput" type="number" min="0" max="50" step="1"></label></div>
             <label class="check-row"><input id="stepsInput" type="checkbox"><span>На пути есть ступени</span></label>
             <label>Переход<select id="crossingInput"><option value="unknown">Не указано</option><option value="none">Нет перехода</option><option value="marked">Размеченный</option><option value="signal">Со светофором</option><option value="uncontrolled">Без регулирования</option></select></label>
             <div class="form-row"><label class="check-row"><input id="litInput" type="checkbox"><span>Освещён вечером</span></label><label class="check-row"><input id="verifiedInput" type="checkbox"><span>Проверено на месте</span></label></div>

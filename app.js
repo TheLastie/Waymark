@@ -34,6 +34,12 @@
     { id:'e16',a:'garden',b:'clinic',km:.48,surface:'gravel',slope:7,curb:4,steps:false,crossing:'none',lit:false,verified:false,note:'' }
   ];
   const profileNames = { wheelchair:'Кресло-коляска', walker:'Опора / ходунки', stroller:'Коляска с ребёнком', walking:'Пешком' };
+  const profilePace = {
+    wheelchair: { minutesPerKm: 19, label: 'на кресле-коляске' },
+    walker: { minutesPerKm: 22, label: 'с ходунками' },
+    stroller: { minutesPerKm: 16, label: 'с коляской' },
+    walking: { minutesPerKm: 13, label: 'пешком' }
+  };
   const issueText = (edge, profile) => {
     const out=[];
     if(edge.steps===true && profile!=='walking') out.push('ступени');
@@ -155,7 +161,8 @@
     const barriers=route.edges.filter(e=>e.steps===true||e.slope!=null&&e.slope>=10||e.curb!=null&&e.curb>=5||e.crossing==='uncontrolled').length;
     const unknown=route.edges.filter(e=>!e.verified||e.steps==null||e.slope==null||e.curb==null||e.surface==='unknown'||e.crossing==='unknown'||e.lit==null).length;
     $('routeDistance').textContent=route.km.toFixed(2);
-    $('routeMinutes').textContent=`≈ ${Math.max(1,Math.round(route.km*13))} мин пешком`;
+    const pace = profilePace[p] || profilePace.walking;
+    $('routeMinutes').textContent=`≈ ${Math.max(1,Math.round(route.km*pace.minutesPerKm))} мин ${pace.label}`;
     $('barrierCount').textContent=String(barriers);
     $('unknownCount').textContent=String(unknown);
     const summaries={balanced:'Учитывает состояние покрытия, уклон, бордюры и качество переходов. Непроверенные места получают дополнительный вес.',short:'Минимальная длина пути. Перед выходом посмотрите на бордюры и непроверенные участки вдоль линии.',verified:'Сильнее избегает участков без полевой проверки. Если данных мало, маршрут может стать длиннее.'};
@@ -223,8 +230,8 @@
   }
   function download(name,data,type){const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   function report(){
-    const p=profile(),route=lastRoutes[chosenMode];
-    const payload={product:'Waymark',formatVersion:1,generatedAt:new Date().toISOString(),dataNotice:isCustomNetwork?'Пользовательская схема. Waymark не подтверждает точность уличных или полевых данных.':'Демонстрационная схема улиц. Не является официальной навигацией или проверенной картой доступности.',profile:p,from:nodesById[$('startSelect').value].name,to:nodesById[$('endSelect').value].name,routeMode:chosenMode,route:route?{distanceKm:Number(route.km.toFixed(2)),estimatedWalkingMinutes:Math.round(route.km*13),segments:route.edges.map(edgeRecord)}:null,observations:edges.filter(e=>issueText(e,p).length).map(edgeRecord)};
+    const p=profile(),pace=profilePace[p]||profilePace.walking,route=lastRoutes[chosenMode];
+    const payload={product:'Waymark',formatVersion:1,generatedAt:new Date().toISOString(),dataNotice:isCustomNetwork?'Пользовательская схема. Waymark не подтверждает точность уличных или полевых данных.':'Демонстрационная схема улиц. Не является официальной навигацией или проверенной картой доступности.',profile:p,from:nodesById[$('startSelect').value].name,to:nodesById[$('endSelect').value].name,routeMode:chosenMode,route:route?{distanceKm:Number(route.km.toFixed(2)),estimatedTravelMinutes:Math.max(1,Math.round(route.km*pace.minutesPerKm)),paceProfile:p,paceDescription:pace.label,segments:route.edges.map(edgeRecord)}:null,observations:edges.filter(e=>issueText(e,p).length).map(edgeRecord)};
     download('waymark-route-report.json',JSON.stringify(payload,null,2),'application/json');
   }
   function edgeRecord(e){return {from:nodesById[e.a].name,to:nodesById[e.b].name,distanceKm:e.km,surface:e.surface,slopePercent:e.slope,curbCm:e.curb,steps:e.steps,crossing:e.crossing,lit:e.lit,fieldVerified:e.verified,note:e.note||''};}

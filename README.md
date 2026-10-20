@@ -16,8 +16,9 @@ Open `index.html` in a recent browser. No build step, account, server or network
 
 1. Choose a start, destination and mobility profile.
 2. Compare balanced, shortest and more thoroughly checked routes.
-3. Select a street segment on the map to record its surface, slope, curb, crossing, lighting, verification and a note.
-4. Download a route report (JSON), segment register (CSV), or a local map you can reopen later.
+3. Review the approximate travel time for the selected mobility profile; the JSON report uses the same pace estimate and profile, not a live ETA.
+4. Select a street segment on the map to record its surface, slope, curb, crossing, lighting, verification and a note.
+5. Download a route report (JSON), segment register (CSV), or a local map you can reopen later.
 
 ### Bring your own survey network
 
@@ -41,6 +42,12 @@ Waymark can open a small JSON network prepared from a local accessibility survey
 
 `surface` accepts `unknown`, `smooth`, `pavers`, `rough`, or `gravel`; `crossing` accepts `unknown`, `none`, `marked`, `signal`, or `uncontrolled`. A network can contain 2–100 places and 1–500 segments. Missing measurements stay unknown, increase the route's uncertainty and remain visible in the report. The app validates imported data, keeps it in this browser, and flags user-provided information as unverified until someone records a field check.
 
+## Field units / Единицы измерения
+
+The `slope` field is a longitudinal grade in percent, not an angle in degrees: `3` means `3%`.
+
+Поле `slope` задаёт продольный уклон в процентах, а не угол в градусах: `3` означает `3%`.
+
 ## Why this project exists
 
 City accessibility data is often incomplete or outdated. Waymark makes uncertainty visible instead of silently treating an unverified sidewalk as safe. Its useful output is a shareable list of exact segments to check, with enough context for a resident, community group or city team to discuss what needs fixing.
@@ -59,8 +66,9 @@ The visual idea is a **field atlas**: a quiet street-map palette with a distinct
 
 1. Выберите начальную точку, место назначения и профиль передвижения.
 2. Сравните сбалансированный, кратчайший и более тщательно проверенный маршруты.
-3. Выберите отрезок улицы на карте и укажите покрытие, уклон, бордюр, переход, освещение, проверку и заметку.
-4. Скачайте отчёт по маршруту (JSON), таблицу отрезков (CSV) или локальную карту для последующего открытия.
+3. Посмотрите примерное время в пути для выбранного профиля; JSON-отчёт использует тот же темп и профиль, это не живой прогноз прибытия.
+4. Выберите отрезок улицы на карте и укажите покрытие, уклон, бордюр, переход, освещение, проверку и заметку.
+5. Скачайте отчёт по маршруту (JSON), таблицу отрезков (CSV) или локальную карту для последующего открытия.
 
 Waymark принимает собственные JSON-схемы районной сети: места с `id`, `name`, координатами схемы `x` и `y`, а также отрезки между ними с длиной и условиями прохода. Если измерений нет, они остаются неизвестными, влияют на сравнение маршрутов и видны в отчёте. Импортированные схемы можно редактировать, сохранить в браузере и выгрузить вместе с пометками. Пример и допустимые поля находятся выше.
 
