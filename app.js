@@ -145,9 +145,9 @@
       }
     }
     if(!Number.isFinite(dist[end])) return null;
-    const route=[]; let cursor=end;
-    while(cursor!==start){const step=prev[cursor]; if(!step)return null;route.unshift(step.edge);cursor=step.id;}
-    return {edges:route, nodes:[start,...route.map(e=>e.a===cursor?e.b:(e.a===start?e.b:e.a))], km:route.reduce((sum,e)=>sum+e.km,0), cost:dist[end]};
+    const route=[], path=[end]; let cursor=end;
+    while(cursor!==start){const step=prev[cursor]; if(!step)return null;route.unshift(step.edge);path.unshift(step.id);cursor=step.id;}
+    return {edges:route, nodes:path, km:route.reduce((sum,e)=>sum+e.km,0), cost:dist[end]};
   }
   function setStatus(text,kind='ok'){ $('routeStatus').textContent=text; $('routeStatusMark').style.background=kind==='warn'?'var(--amber)':kind==='bad'?'var(--coral)':'var(--green)'; }
   function refresh(){
